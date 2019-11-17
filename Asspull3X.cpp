@@ -377,6 +377,12 @@ int main(int argc, char*argv[])
 			{
 				HandleHdma(line);
 				RenderLine(line);
+				if (interrupts == 0)
+				{
+					//Enabling this kills the system. Somehow.
+					//interrupts |= 2; //set HBlank signal
+					//m68k_set_irq(4);
+				}
 			}
 			if (line == lines)
 			{
@@ -411,21 +417,15 @@ int main(int argc, char*argv[])
 				frames++;
 				if (pauseState != 2)
 				{
-					if ((interrupts & 0x84) == 0) //if interrupts are enabled and not already in VBlank
+					if (interrupts == 0)
 					{
 						interrupts |= 4; //set VBlank signal
-						m68k_set_virq(M68K_IRQ_7, 1);
+						m68k_set_irq(6);
 					}
 				}
 			}
 			if (pauseState != 2)
 			{
-				//Would trigger HBlank here but that kills the system???
-				/* if ((interrupts & 0x82) == 0) //if interrupts are enabled and not already in HBlank
-				{
-					interrupts |= 2; //set HBlank signal
-					m68k_set_virq(M68K_IRQ_7, 1);
-				} */
 				m68k_execute(hBlankLasts);
 			}
 		}

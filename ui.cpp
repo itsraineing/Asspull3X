@@ -2398,7 +2398,7 @@ int _uiAboutWin(int me)
 extern "C" unsigned int m68k_read_memory_8(unsigned int address);
 int _uiMemoryViewer(int);
 uiWindow memoryViewerWindow = { 0x1337, 128, 128, 260, 334, "Memory Viewer", _uiMemoryViewer };
-signed long memViewerOffset = MAP1_ADDR;
+signed long memViewerOffset = VRAM_ADDR;
 #define MAXVIEWEROFFSET (0x10000000 - 0x100)
 int _uiMemoryViewer(int me)
 {
