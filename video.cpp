@@ -729,7 +729,7 @@ void Screenshot()
 	char snap[128];
 	__time64_t now;
 	_time64(&now);
-	sprintf_s(snap, 128, "%u.bmp", now);
+	sprintf_s(snap, 128, "%llu.bmp", now);
 
 	int winWidth, winHeight;
 	SDL_GetWindowSize(sdlWindow, &winWidth, &winHeight);

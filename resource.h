@@ -1566,7 +1566,40 @@
 #define SPVERSION_MASK                  0x0000FF00
 #define UNICODE_NOCHAR                  0xFFFF
 #define IDC_STATIC                      -1
+#define IDC_CHECK1 1005
 
+
+/*
+* Button Control Styles
+*/
+#define BS_PUSHBUTTON       0x00000000L
+#define BS_DEFPUSHBUTTON    0x00000001L
+#define BS_CHECKBOX         0x00000002L
+#define BS_AUTOCHECKBOX     0x00000003L
+#define BS_RADIOBUTTON      0x00000004L
+#define BS_3STATE           0x00000005L
+#define BS_AUTO3STATE       0x00000006L
+#define BS_GROUPBOX         0x00000007L
+#define BS_USERBUTTON       0x00000008L
+#define BS_AUTORADIOBUTTON  0x00000009L
+#define BS_PUSHBOX          0x0000000AL
+#define BS_OWNERDRAW        0x0000000BL
+#define BS_TYPEMASK         0x0000000FL
+#define BS_LEFTTEXT         0x00000020L
+#define BS_TEXT             0x00000000L
+#define BS_ICON             0x00000040L
+#define BS_BITMAP           0x00000080L
+#define BS_LEFT             0x00000100L
+#define BS_RIGHT            0x00000200L
+#define BS_CENTER           0x00000300L
+#define BS_TOP              0x00000400L
+#define BS_BOTTOM           0x00000800L
+#define BS_VCENTER          0x00000C00L
+#define BS_PUSHLIKE         0x00001000L
+#define BS_MULTILINE        0x00002000L
+#define BS_NOTIFY           0x00004000L
+#define BS_FLAT             0x00008000L
+#define BS_RIGHTBUTTON      BS_LEFTTEXT
 
 /*
 * Dialog Styles

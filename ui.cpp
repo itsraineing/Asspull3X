@@ -4,8 +4,6 @@
 
 #include "asspull.h"
 #include "SDL_syswm.h"
-#include "ini.h"
-
 #include <Windows.h>
 #include <commdlg.h>
 
@@ -86,11 +84,9 @@ int InitUI()
 bool ShowFileDlg(bool toSave, char* target, size_t max, const char* filter)
 {
 	OPENFILENAME ofn;
-	wchar_t szFile[260];
-	wchar_t sFilter[512];
-	mbstowcs_s(NULL, szFile, 260, target, max);
-	mbstowcs_s(NULL, sFilter, 512, filter, 256);
-	wchar_t* f = sFilter;
+	char sFilter[512];
+	strcpy_s(sFilter, 512, filter);
+	char* f = sFilter;
 	while (*f)
 	{
 		if (*f == '|')
@@ -103,9 +99,9 @@ bool ShowFileDlg(bool toSave, char* target, size_t max, const char* filter)
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hWnd;
-	ofn.lpstrFile = szFile;
+	ofn.lpstrFile = target;
 	ofn.lpstrFile[0] = '\0';
-	ofn.nMaxFile = sizeof(szFile);
+	ofn.nMaxFile = max;
 	ofn.lpstrFilter = sFilter;
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
@@ -113,11 +109,17 @@ bool ShowFileDlg(bool toSave, char* target, size_t max, const char* filter)
 	ofn.lpstrInitialDir = NULL;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
+	char cwd[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, cwd);
+
 	if ((!toSave && (GetOpenFileName(&ofn) == TRUE)) || (toSave && (GetSaveFileName(&ofn) == TRUE)))
 	{
-		wcstombs_s(NULL, target, max, ofn.lpstrFile, max);
+		SetCurrentDirectory(cwd);
+		strcpy_s(target, max, ofn.lpstrFile);
 		return true;
 	}
+
+	SetCurrentDirectory(cwd);
 	return false;
 }
 
