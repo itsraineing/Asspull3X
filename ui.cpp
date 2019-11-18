@@ -42,7 +42,7 @@ int InitUI()
 		
 #define C2WP(x) (1000 + (x))
 
-		HMENU mnuFile = CreateMenu();
+		HMENU mnuFile = CreatePopupMenu();
 		AppendMenu(mnuFile, MF_STRING, C2WP(cmdLoadRom), _T("&Load ROM"));
 		AppendMenu(mnuFile, MF_STRING, C2WP(cmdUnloadRom), _T("&Unload ROM"));
 		AppendMenu(mnuFile, MF_STRING, C2WP(cmdReset), _T("&Reset"));
@@ -50,10 +50,10 @@ int InitUI()
 		AppendMenu(mnuFile, MF_STRING, C2WP(cmdQuit), _T("&Quit"));
 		AppendMenu(menuBar, MF_POPUP, (UINT_PTR)mnuFile, _T("&File"));
 
-		HMENU mnuDevices = CreateMenu();
+		HMENU mnuDevices = CreatePopupMenu();
 		AppendMenu(menuBar, MF_POPUP | MF_DISABLED, (UINT_PTR)mnuDevices, _T("&Devices"));
 
-		HMENU mnuTools = CreateMenu();
+		HMENU mnuTools = CreatePopupMenu();
 		AppendMenu(mnuTools, MF_STRING, C2WP(cmdScreenshot), _T("&Screenshot"));
 		AppendMenu(mnuTools, MF_STRING, C2WP(cmdDump), _T("&Dump RAM"));
 		AppendMenu(mnuTools, MF_STRING | MF_DISABLED, C2WP(cmdMemViewer), _T("&Memory viewer"));
