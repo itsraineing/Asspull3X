@@ -712,7 +712,7 @@ int InitVideo()
 	auto thing = ini->Get("video", "stretch200", "false");
 	if (thing[0] == 't' || thing[0] == 'T' || thing[0] == 1) stretch200 = true;
 
-	SDL_ShowCursor(0);
+	SDL_ShowCursor(1);
 	return 0;
 }
 

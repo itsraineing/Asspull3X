@@ -31,7 +31,7 @@ extern int InitMemory();
 extern int InitSound(int device);
 extern int UninitSound();
 
-extern void HandleUI();
+extern int InitUI();
 
 extern IniFile* ini;
 
@@ -46,6 +46,8 @@ enum uiCommands
 	cmdScreenshot,
 	cmdDump,
 	cmdQuit,
+	cmdMemViewer,
+	cmdAbout,
 	cmdInsertDisk,
 	cmdEjectDisk,
 	cmdCreateDisk,

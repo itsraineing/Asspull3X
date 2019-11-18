@@ -123,6 +123,9 @@ int main(int argc, char*argv[])
 	if (InitVideo() < 0)
 		return 0;
 
+	if (InitUI() < 0)
+		return 0;
+
 	//Absolutely always load a disk drive as #0
 	devices[0] = (Device*)(new DiskDrive());
 	for (int i = 1; i < MAXDEVS; i++)
@@ -391,7 +394,6 @@ int main(int argc, char*argv[])
 					}
 					pauseState = 2;
 				}
-				HandleUI();
 				VBlank();
 
 				if (!startTime)
@@ -402,7 +404,7 @@ int main(int argc, char*argv[])
 				auto averageFPS = frames / (SDL_GetTicks() / 1000.0f);
 				if (averageFPS > 2000000)
 					averageFPS = 0;
-				sprintf_s(uiFPS, 32, "%d", (int)averageFPS);
+				//sprintf_s(uiFPS, 32, "%d", (int)averageFPS);
 				if (fpsCap && delta < 20)
 					SDL_Delay(20 - delta);
 				startTime = endTime;
@@ -432,7 +434,6 @@ int main(int argc, char*argv[])
 		else if (pauseState == 2)
 		{
 			memcpy(pixels, pauseScreen, 640 * 480 * 4);
-			HandleUI();
 			VBlank();
 		}
 		line++;
