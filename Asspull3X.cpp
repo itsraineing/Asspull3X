@@ -3,7 +3,8 @@
 extern "C" {
 #include "musashi\m68k.h"
 }
-#include "nativefiledialog\src\include\nfd.h"
+
+extern bool ShowFileDlg(bool toSave, char* target, size_t max, const char* filter);
 
 static bool quit = 0;
 int line = 0, interrupts = 0;
@@ -261,9 +262,8 @@ int main(int argc, char*argv[])
 		{
 			if (uiCommand == cmdLoadRom)
 			{
-				nfdchar_t* thePath = NULL;
-				nfdresult_t nfdResult = NFD_OpenDialog("ap3", NULL, &thePath);
-				if (nfdResult == NFD_OKAY)
+				char thePath[256] = { 0 };
+				if (ShowFileDlg(false, thePath, 256, "Asspull IIIx ROMS (*.ap3)|*.ap3"))
 				{
 					auto ext = strrchr(thePath, '.') + 1;
 					if (SDL_strncasecmp(ext, "ap3", 3) == 0)
@@ -284,9 +284,8 @@ int main(int argc, char*argv[])
 			}
 			else if (uiCommand == cmdInsertDisk)
 			{
-				nfdchar_t* thePath = NULL;
-				nfdresult_t nfdResult = NFD_OpenDialog("img", NULL, &thePath);
-				if (nfdResult == NFD_OKAY)
+				char thePath[256] = { 0 };
+				if (ShowFileDlg(false, thePath, 256, "Disk images (*.img)|*.img"))
 				{
 					auto ext = strrchr(thePath, '.') + 1;
 					if (SDL_strncasecmp(ext, "img", 3) == 0)
@@ -350,9 +349,11 @@ int main(int argc, char*argv[])
 			}
 			else if (uiCommand == cmdCreateDisk)
 			{
-				nfdchar_t* thePath = NULL;
-				nfdresult_t nfdResult = NFD_SaveDialog("img", NULL, &thePath);
-				if (nfdResult == NFD_OKAY)
+				//nfdchar_t* thePath = NULL;
+				//nfdresult_t nfdResult = NFD_SaveDialog("img", NULL, &thePath);
+				//if (nfdResult == NFD_OKAY)
+				char thePath[256] = { 0 };
+				if (ShowFileDlg(true, thePath, 256, "Disk images (*.img)|*.img"))
 				{
 					FILE* file = NULL;
 					auto ret = fopen_s(&file, thePath, "wb");

@@ -7,10 +7,26 @@
 #include "ini.h"
 
 #include <Windows.h>
+#include <commdlg.h>
 
 HWND hWnd;
 HINSTANCE hInstance;
 int uiData, uiCommand;
+
+HWND hWndAbout = NULL;
+BOOL CALLBACK AboutWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_CLOSE:
+	case WM_COMMAND:
+		//EndDialog(hwndDlg, wParam);
+		DestroyWindow(hwndDlg);
+		hWndAbout = NULL;
+		return TRUE;
+	}
+	return FALSE;
+}
 
 void WndProc(void* userdata, void* hWnd, unsigned int message, Uint64 wParam, Sint64 lParam)
 {
@@ -20,6 +36,16 @@ void WndProc(void* userdata, void* hWnd, unsigned int message, Uint64 wParam, Si
 		if (wParam > 1000 && wParam < 2000)
 		{
 			uiCommand = (int)(wParam - 1000);
+			if (uiCommand == cmdAbout)
+			{
+				uiCommand = cmdNone;
+				//DialogBox(hInstance, MAKEINTRESOURCE(102), (HWND)hWnd, (DLGPROC)AboutWndProc);
+				if (!IsWindow(hWndAbout))
+				{
+					hWndAbout = CreateDialog(hInstance, MAKEINTRESOURCE(102), (HWND)hWnd, (DLGPROC)AboutWndProc);
+					ShowWindow(hWndAbout, SW_SHOW);
+				}
+			}
 		}
 	}
 }
@@ -38,26 +64,7 @@ int InitUI()
 
 		SDL_SetWindowsMessageHook(WndProc, 0);
 
-		HMENU menuBar = CreateMenu();
-		
-#define C2WP(x) (1000 + (x))
-
-		HMENU mnuFile = CreatePopupMenu();
-		AppendMenu(mnuFile, MF_STRING, C2WP(cmdLoadRom), _T("&Load ROM"));
-		AppendMenu(mnuFile, MF_STRING, C2WP(cmdUnloadRom), _T("&Unload ROM"));
-		AppendMenu(mnuFile, MF_STRING, C2WP(cmdReset), _T("&Reset"));
-		AppendMenu(mnuFile, MF_SEPARATOR, 0, 0);
-		AppendMenu(mnuFile, MF_STRING, C2WP(cmdQuit), _T("&Quit"));
-		AppendMenu(menuBar, MF_POPUP, (UINT_PTR)mnuFile, _T("&File"));
-
-		//Redo devices as a window.
-
-		HMENU mnuTools = CreatePopupMenu();
-		AppendMenu(mnuTools, MF_STRING, C2WP(cmdScreenshot), _T("&Screenshot"));
-		AppendMenu(mnuTools, MF_STRING, C2WP(cmdDump), _T("&Dump RAM"));
-		AppendMenu(mnuTools, MF_STRING | MF_DISABLED, C2WP(cmdMemViewer), _T("&Memory viewer"));
-		AppendMenu(mnuTools, MF_STRING | MF_DISABLED, C2WP(cmdAbout), _T("&About"));
-		AppendMenu(menuBar, MF_POPUP, (UINT_PTR)mnuTools, _T("&Tools"));
+		HMENU menuBar = LoadMenu(hInstance, MAKEINTRESOURCE(101));
 
 		MENUINFO mainInfo =
 		{
@@ -74,6 +81,44 @@ int InitUI()
 		SetMenu(hWnd, menuBar);
 	}
 	return 0;
+}
+
+bool ShowFileDlg(bool toSave, char* target, size_t max, const char* filter)
+{
+	OPENFILENAME ofn;
+	wchar_t szFile[260];
+	wchar_t sFilter[512];
+	mbstowcs_s(NULL, szFile, 260, target, max);
+	mbstowcs_s(NULL, sFilter, 512, filter, 256);
+	wchar_t* f = sFilter;
+	while (*f)
+	{
+		if (*f == '|')
+			*f = 0;
+		f++;
+	}
+	*f++ = 0;
+	*f++ = 0;
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = sFilter;
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = NULL;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if ((!toSave && (GetOpenFileName(&ofn) == TRUE)) || (toSave && (GetSaveFileName(&ofn) == TRUE)))
+	{
+		wcstombs_s(NULL, target, max, ofn.lpstrFile, max);
+		return true;
+	}
+	return false;
 }
 
 void SetStatus(char*)
