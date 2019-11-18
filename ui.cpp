@@ -50,8 +50,7 @@ int InitUI()
 		AppendMenu(mnuFile, MF_STRING, C2WP(cmdQuit), _T("&Quit"));
 		AppendMenu(menuBar, MF_POPUP, (UINT_PTR)mnuFile, _T("&File"));
 
-		HMENU mnuDevices = CreatePopupMenu();
-		AppendMenu(menuBar, MF_POPUP | MF_DISABLED, (UINT_PTR)mnuDevices, _T("&Devices"));
+		//Redo devices as a window.
 
 		HMENU mnuTools = CreatePopupMenu();
 		AppendMenu(mnuTools, MF_STRING, C2WP(cmdScreenshot), _T("&Screenshot"));
@@ -59,6 +58,18 @@ int InitUI()
 		AppendMenu(mnuTools, MF_STRING | MF_DISABLED, C2WP(cmdMemViewer), _T("&Memory viewer"));
 		AppendMenu(mnuTools, MF_STRING | MF_DISABLED, C2WP(cmdAbout), _T("&About"));
 		AppendMenu(menuBar, MF_POPUP, (UINT_PTR)mnuTools, _T("&Tools"));
+
+		MENUINFO mainInfo =
+		{
+			sizeof(MENUINFO),
+			MIM_APPLYTOSUBMENUS | MIM_STYLE,
+			MNS_MODELESS | MNS_AUTODISMISS,
+			0,
+			NULL,
+			NULL,
+			0
+		};
+		SetMenuInfo(menuBar, &mainInfo);
 
 		SetMenu(hWnd, menuBar);
 	}
