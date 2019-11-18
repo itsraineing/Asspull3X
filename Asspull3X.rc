@@ -1,6 +1,22 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
 /////////////////////////////////////////////////////////////////////////////
 // Dutch (Netherlands) resources
 
@@ -31,6 +47,12 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
     "\0"
 END
 
@@ -62,7 +84,7 @@ BEGIN
     BEGIN
         MENUITEM "&Screenshot",                 1004
         MENUITEM "&Dump RAM",                   1005
-        MENUITEM "&Memory viewer",              1007, INACTIVE
+        MENUITEM "&Memory viewer",              1007
         MENUITEM "&About",                      1008
     END
 END

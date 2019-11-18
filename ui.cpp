@@ -11,7 +11,8 @@ HWND hWnd;
 HINSTANCE hInstance;
 int uiData, uiCommand;
 
-HWND hWndAbout = NULL;
+HWND hWndAbout = NULL, hWndMemViewer = NULL;
+
 BOOL CALLBACK AboutWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -22,6 +23,63 @@ BOOL CALLBACK AboutWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 		DestroyWindow(hwndDlg);
 		hWndAbout = NULL;
 		return TRUE;
+	}
+	return FALSE;
+}
+
+unsigned long memViewerOffset;
+
+void MemViewerDraw(HWND hwndDlg)
+{
+}
+
+void MemViewerComboProc(HWND hwndDlg)
+{
+	int index = SendDlgItemMessage(hwndDlg, 1000, CB_GETCURSEL, 0, 0);
+	unsigned long areas[] =
+	{
+		BIOS_ADDR, CART_ADDR, WRAM_ADDR, DEVS_ADDR, REGS_ADDR, VRAM_ADDR
+	};
+	memViewerOffset = areas[index];
+	char asText[64] = { 0 };
+	sprintf_s(asText, 64, "%08X", memViewerOffset);
+	SetDlgItemText(hwndDlg, 1002, asText);
+	MemViewerDraw(hwndDlg);
+}
+
+BOOL CALLBACK MemViewerWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_CLOSE:
+		DestroyWindow(hwndDlg);
+		hWndMemViewer = NULL;
+		return TRUE;
+	case WM_INITDIALOG:
+	{
+		HWND textBox = GetDlgItem(hwndDlg, 1002);
+		SendDlgItemMessage(hwndDlg, 1002, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), FALSE);
+		LPCSTR areas[] =
+		{
+			"BIOS", "Cart", "WRAM", "Devices", "Registers", "VRAM"
+		};
+		for (int i = 0; i < 6; i++)
+			SendDlgItemMessage(hwndDlg, 1000, CB_ADDSTRING, 0, (LPARAM)areas[i]);
+		SendDlgItemMessage(hwndDlg, 1000, CB_SETCURSEL, 1, 0);
+		return true;
+	}
+	case WM_COMMAND:
+	{
+		if (LOWORD(wParam) == 1000) //Combo
+		{
+			switch (HIWORD(wParam))
+			{
+			case CBN_SELCHANGE:
+				MemViewerComboProc(hwndDlg);
+				return true;
+			}
+		}
+	}
 	}
 	return FALSE;
 }
@@ -37,11 +95,19 @@ void WndProc(void* userdata, void* hWnd, unsigned int message, Uint64 wParam, Si
 			if (uiCommand == cmdAbout)
 			{
 				uiCommand = cmdNone;
-				//DialogBox(hInstance, MAKEINTRESOURCE(102), (HWND)hWnd, (DLGPROC)AboutWndProc);
 				if (!IsWindow(hWndAbout))
 				{
 					hWndAbout = CreateDialog(hInstance, MAKEINTRESOURCE(102), (HWND)hWnd, (DLGPROC)AboutWndProc);
 					ShowWindow(hWndAbout, SW_SHOW);
+				}
+			}
+			else if (uiCommand == cmdMemViewer)
+			{
+				uiCommand = cmdNone;
+				if (!IsWindow(hWndMemViewer))
+				{
+					hWndMemViewer = CreateDialog(hInstance, MAKEINTRESOURCE(108), (HWND)hWnd, (DLGPROC)MemViewerWndProc);
+					ShowWindow(hWndMemViewer, SW_SHOW);
 				}
 			}
 		}
