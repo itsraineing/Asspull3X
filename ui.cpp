@@ -116,6 +116,12 @@ BOOL CALLBACK OptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 			ini->Set("video", "stretch200", stretch200 ? "true" : "false");
 			return true;
 		}
+		else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDOK)
+		{
+			DestroyWindow(hwndDlg);
+			hWndOptions = NULL;
+			return true;
+		}
 	}
 	}
 	return false;

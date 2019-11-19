@@ -14,14 +14,22 @@
 #define IDC_COMBO1                      1000
 #define IDC_COMBO2                      1001
 #define IDC_EDIT1                       1002
+#define IDC_DDFILE                      1002
 #define IDC_BUTTON1                     1003
+#define IDC_DDINSERT                    1003
 #define IDC_BUTTON2                     1004
 #define IDC_MEMVIEWERDROP               1004
+#define IDC_DDEJECT                     1004
 #define IDC_AUTOUPDATE                  1005
 #define IDC_MEMVIEWEROFFSET             1006
 #define IDC_MEMVIEWERGRID               1007
 #define IDC_FPSCAP                      1008
 #define IDC_ASPECT                      1009
+#define IDC_LIST1                       1009
+#define IDC_DEVLIST                     1009
+#define IDC_HEADER                      1010
+#define IDC_DEVTYPE                     1011
+#define IDC_DEVNONE                     1012
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -30,7 +38,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        111
 #define _APS_NEXT_COMMAND_VALUE         40011
-#define _APS_NEXT_CONTROL_VALUE         1009
+#define _APS_NEXT_CONTROL_VALUE         1013
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
