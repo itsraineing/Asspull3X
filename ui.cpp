@@ -22,9 +22,9 @@ BOOL CALLBACK AboutWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 		//EndDialog(hwndDlg, wParam);
 		DestroyWindow(hwndDlg);
 		hWndAbout = NULL;
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 unsigned long memViewerOffset;
@@ -36,10 +36,7 @@ void MemViewerDraw(HWND hwndDlg)
 void MemViewerComboProc(HWND hwndDlg)
 {
 	int index = SendDlgItemMessage(hwndDlg, 1000, CB_GETCURSEL, 0, 0);
-	unsigned long areas[] =
-	{
-		BIOS_ADDR, CART_ADDR, WRAM_ADDR, DEVS_ADDR, REGS_ADDR, VRAM_ADDR
-	};
+	uint32_t areas[] = { BIOS_ADDR, CART_ADDR, WRAM_ADDR, DEVS_ADDR, REGS_ADDR, VRAM_ADDR };
 	memViewerOffset = areas[index];
 	char asText[64] = { 0 };
 	sprintf_s(asText, 64, "%08X", memViewerOffset);
@@ -51,37 +48,39 @@ BOOL CALLBACK MemViewerWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM
 {
 	switch (message)
 	{
-	case WM_CLOSE:
-		DestroyWindow(hwndDlg);
-		hWndMemViewer = NULL;
-		return TRUE;
-	case WM_INITDIALOG:
-	{
-		HWND textBox = GetDlgItem(hwndDlg, 1002);
-		SendDlgItemMessage(hwndDlg, 1002, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), FALSE);
-		LPCSTR areas[] =
+		case WM_CLOSE:
 		{
-			"BIOS", "Cart", "WRAM", "Devices", "Registers", "VRAM"
-		};
-		for (int i = 0; i < 6; i++)
-			SendDlgItemMessage(hwndDlg, 1000, CB_ADDSTRING, 0, (LPARAM)areas[i]);
-		SendDlgItemMessage(hwndDlg, 1000, CB_SETCURSEL, 1, 0);
-		return true;
-	}
-	case WM_COMMAND:
-	{
-		if (LOWORD(wParam) == 1000) //Combo
+			DestroyWindow(hwndDlg);
+			hWndMemViewer = NULL;
+			return true;
+		}
+		case WM_INITDIALOG:
 		{
-			switch (HIWORD(wParam))
+			HWND textBox = GetDlgItem(hwndDlg, 1002);
+			SendDlgItemMessage(hwndDlg, 1002, WM_SETFONT, (WPARAM)GetStockObject(SYSTEM_FIXED_FONT), false);
+			LPCSTR areas[] = { "BIOS", "Cart", "WRAM", "Devices", "Registers", "VRAM" };
+			for (int i = 0; i < 6; i++)
+				SendDlgItemMessage(hwndDlg, 1000, CB_ADDSTRING, 0, (LPARAM)areas[i]);
+			SendDlgItemMessage(hwndDlg, 1000, CB_SETCURSEL, 1, 0);
+			MemViewerComboProc(hwndDlg); //force update
+			return true;
+		}
+		case WM_COMMAND:
+		{
+			if (LOWORD(wParam) == 1000) //Combo
 			{
-			case CBN_SELCHANGE:
-				MemViewerComboProc(hwndDlg);
-				return true;
+				switch (HIWORD(wParam))
+				{
+					case CBN_SELCHANGE:
+					{
+						MemViewerComboProc(hwndDlg);
+						return true;
+					}
+				}
 			}
 		}
 	}
-	}
-	return FALSE;
+	return false;
 }
 
 void WndProc(void* userdata, void* hWnd, unsigned int message, Uint64 wParam, Sint64 lParam)
@@ -122,7 +121,7 @@ int InitUI()
 	{
 		if (info.subsystem != SDL_SYSWM_WINDOWS)
 			return -1;
-		
+
 		hWnd = info.info.win.window;
 		hInstance = info.info.win.hinstance;
 
