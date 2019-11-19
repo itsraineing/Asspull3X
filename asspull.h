@@ -48,6 +48,7 @@ enum uiCommands
 	cmdQuit,
 	cmdMemViewer,
 	cmdAbout,
+	cmdOptions,
 	cmdInsertDisk,
 	cmdEjectDisk,
 	cmdCreateDisk,
