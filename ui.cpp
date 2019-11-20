@@ -132,6 +132,9 @@ void UpdateDevicePage(HWND hwndDlg)
 	int selection = SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCURSEL, 0, 0);
 	auto device = devices[selection];
 
+	//Don't allow changing device #0 from disk drive
+	EnableWindow(GetDlgItem(hwndDlg, IDC_DEVTYPE), (selection > 0));
+
 	//Hide everything regardless at first.
 	int everything[] = { IDC_DEVNONE, IDC_DDFILE, IDC_DDINSERT, IDC_DDEJECT };
 	for (int i = 0; i < 4; i++)
@@ -141,6 +144,7 @@ void UpdateDevicePage(HWND hwndDlg)
 	{
 		ShowWindow(GetDlgItem(hwndDlg, IDC_DEVNONE), SW_SHOW);
 		SetDlgItemText(hwndDlg, IDC_HEADER, "No device");
+		SendDlgItemMessage(hwndDlg, IDC_DEVTYPE, LB_SETCURSEL, 0, 0);
 	}
 	else
 	{
@@ -150,10 +154,12 @@ void UpdateDevicePage(HWND hwndDlg)
 			for (int i = 1; i < 4; i++)
 				ShowWindow(GetDlgItem(hwndDlg, everything[i]), SW_SHOW);
 			SetDlgItemText(hwndDlg, IDC_HEADER, "Disk drive");
+			SendDlgItemMessage(hwndDlg, IDC_DEVTYPE, LB_SETCURSEL, 1, 0);
 			break;
 		case 0x4C50:
 			ShowWindow(GetDlgItem(hwndDlg, IDC_DEVNONE), SW_SHOW);
 			SetDlgItemText(hwndDlg, IDC_HEADER, "Line printer");
+			SendDlgItemMessage(hwndDlg, IDC_DEVTYPE, LB_SETCURSEL, 2, 0);
 			break;
 		}
 	}
@@ -168,9 +174,9 @@ void UpdateDeviceList(HWND hwndDlg)
 	SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_RESETCONTENT, 0, 0);
 	for (int i = 0; i < MAXDEVS; i++)
 	{
-		if (devices[i] == 0)
+		if (devices[i] == NULL)
 		{
-			sprintf_s(item, 64, "%d. <None>", i + 1);
+			sprintf_s(item, 64, "%d. Nothing", i + 1);
 		}
 		else
 		{
@@ -186,8 +192,53 @@ void UpdateDeviceList(HWND hwndDlg)
 		}
 		SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_ADDSTRING, 0, (LPARAM)item);
 	}
+
 	SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_SETCURSEL, selection, 0);
 	UpdateDevicePage(hwndDlg);
+}
+
+void SwitchDevice(HWND hwndDlg)
+{
+	int devNum = SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCURSEL, 0, 0);
+	int newType = SendDlgItemMessage(hwndDlg, IDC_DEVTYPE, LB_GETCURSEL, 0, 0);
+
+	int oldType = 0;
+	if (devices[devNum] != NULL)
+	{
+		switch (devices[devNum]->GetID())
+		{
+		case 0x0144:
+			oldType = 1;
+			break;
+		case 0x4C50:
+			oldType = 2;
+			break;
+		}
+	}
+
+	if (newType == oldType)
+		return;
+
+	char key[8] = { 0 };
+	SDL_itoa(devNum, key, 10);
+
+	if (devices[devNum] != NULL) delete devices[devNum];
+	switch (newType)
+	{
+		case 0:
+			devices[devNum] = NULL;
+			ini->Set("devices", key, "");
+			break;
+		case 1:
+			devices[devNum] = (Device*)(new DiskDrive());
+			ini->Set("devices", key, "diskDrive");
+			break;
+		case 2:
+			devices[devNum] = (Device*)(new LinePrinter());
+			ini->Set("devices", key, "linePrinter");
+			break;
+	}
+	UpdateDeviceList(hwndDlg);
 }
 
 BOOL CALLBACK DevicesWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -202,6 +253,9 @@ BOOL CALLBACK DevicesWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 	}
 	case WM_INITDIALOG:
 	{
+		LPCSTR devices[] = { "Nothing", "Disk drive", "Line printer" };
+		for (int i = 0; i < 3; i++)
+			SendDlgItemMessage(hwndDlg, IDC_DEVTYPE, LB_ADDSTRING, 0, (LPARAM)devices[i]);
 		UpdateDeviceList(hwndDlg);
 		return true;
 	}
@@ -210,6 +264,11 @@ BOOL CALLBACK DevicesWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 		if (HIWORD(wParam) == LBN_SELCHANGE && LOWORD(wParam) == IDC_DEVLIST)
 		{
 			UpdateDevicePage(hwndDlg);
+			return true;
+		}
+		if (HIWORD(wParam) == LBN_SELCHANGE && LOWORD(wParam) == IDC_DEVTYPE)
+		{
+			SwitchDevice(hwndDlg);
 			return true;
 		}
 		else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDOK)
