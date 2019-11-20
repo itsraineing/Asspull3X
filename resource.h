@@ -25,7 +25,6 @@
 #define IDC_MEMVIEWERGRID               1007
 #define IDC_FPSCAP                      1008
 #define IDC_ASPECT                      1009
-#define IDC_LIST1                       1009
 #define IDC_DEVLIST                     1009
 #define IDC_HEADER                      1010
 #define IDC_DEVTYPE                     1011
@@ -37,7 +36,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        111
-#define _APS_NEXT_COMMAND_VALUE         40011
+#define _APS_NEXT_COMMAND_VALUE         40012
 #define _APS_NEXT_CONTROL_VALUE         1013
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

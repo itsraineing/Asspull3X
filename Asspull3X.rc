@@ -82,10 +82,12 @@ BEGIN
     END
     POPUP "&Tools"
     BEGIN
-        MENUITEM "&Screenshot",                 1004
-        MENUITEM "&Dump RAM",                   1005
-        MENUITEM "&Memory viewer",              1007
         MENUITEM "&Options",                    1009
+        MENUITEM SEPARATOR
+        MENUITEM "&Devices",                    1010
+        MENUITEM "Dump &RAM",                   1005
+        MENUITEM "&Memory viewer",              1007
+        MENUITEM "&Screenshot",                 1004
     END
     POPUP "&Help"
     BEGIN
@@ -119,12 +121,11 @@ BEGIN
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,114,20,223,6
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,115,84,222,1
     LTEXT           "Header goes here",IDC_HEADER,114,7,223,13
-    LISTBOX         IDC_DEVLIST,7,7,98,96,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_DEVLIST,7,7,98,96,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     LISTBOX         IDC_DEVTYPE,114,27,73,52,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Insert",IDC_DDINSERT,229,42,50,14,NOT WS_VISIBLE
     PUSHBUTTON      "Eject",IDC_DDEJECT,287,42,50,14,NOT WS_VISIBLE
-    DEFPUSHBUTTON   "OK",IDOK,229,89,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,287,89,50,14
+    DEFPUSHBUTTON   "OK",IDOK,287,89,50,14
     EDITTEXT        IDC_DDFILE,194,27,143,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
 END
 

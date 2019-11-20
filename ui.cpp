@@ -16,7 +16,7 @@ HWND hWnd;
 HINSTANCE hInstance;
 int uiData, uiCommand;
 
-HWND hWndAbout = NULL, hWndMemViewer = NULL, hWndOptions = NULL;
+HWND hWndAbout = NULL, hWndMemViewer = NULL, hWndOptions = NULL, hWndDevices = NULL;
 
 BOOL CALLBACK AboutWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -127,6 +127,101 @@ BOOL CALLBACK OptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 	return false;
 }
 
+void UpdateDevicePage(HWND hwndDlg)
+{
+	int selection = SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCURSEL, 0, 0);
+	auto device = devices[selection];
+
+	//Hide everything regardless at first.
+	int everything[] = { IDC_DEVNONE, IDC_DDFILE, IDC_DDINSERT, IDC_DDEJECT };
+	for (int i = 0; i < 4; i++)
+		ShowWindow(GetDlgItem(hwndDlg, everything[i]), SW_HIDE);
+
+	if (device == NULL)
+	{
+		ShowWindow(GetDlgItem(hwndDlg, IDC_DEVNONE), SW_SHOW);
+		SetDlgItemText(hwndDlg, IDC_HEADER, "No device");
+	}
+	else
+	{
+		switch (device->GetID())
+		{
+		case 0x0144:
+			for (int i = 1; i < 4; i++)
+				ShowWindow(GetDlgItem(hwndDlg, everything[i]), SW_SHOW);
+			SetDlgItemText(hwndDlg, IDC_HEADER, "Disk drive");
+			break;
+		case 0x4C50:
+			ShowWindow(GetDlgItem(hwndDlg, IDC_DEVNONE), SW_SHOW);
+			SetDlgItemText(hwndDlg, IDC_HEADER, "Line printer");
+			break;
+		}
+	}
+}
+
+void UpdateDeviceList(HWND hwndDlg)
+{
+	int selection = 0;
+	if (SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCOUNT, 0, 0))
+		selection = SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCURSEL, 0, 0);
+	char item[64] = { 0 };
+	SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_RESETCONTENT, 0, 0);
+	for (int i = 0; i < MAXDEVS; i++)
+	{
+		if (devices[i] == 0)
+		{
+			sprintf_s(item, 64, "%d. <None>", i + 1);
+		}
+		else
+		{
+			switch (devices[i]->GetID())
+			{
+			case 0x0144:
+				sprintf_s(item, 64, "%d. Disk drive", i + 1);
+				break;
+			case 0x4C50:
+				sprintf_s(item, 64, "%d. Line printer", i + 1);
+				break;
+			}
+		}
+		SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_ADDSTRING, 0, (LPARAM)item);
+	}
+	SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_SETCURSEL, selection, 0);
+	UpdateDevicePage(hwndDlg);
+}
+
+BOOL CALLBACK DevicesWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_CLOSE:
+	{
+		DestroyWindow(hwndDlg);
+		hWndDevices = NULL;
+		return true;
+	}
+	case WM_INITDIALOG:
+	{
+		UpdateDeviceList(hwndDlg);
+		return true;
+	}
+	case WM_COMMAND:
+	{
+		if (HIWORD(wParam) == LBN_SELCHANGE && LOWORD(wParam) == IDC_DEVLIST)
+		{
+			UpdateDevicePage(hwndDlg);
+			return true;
+		}
+		else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDOK)
+		{
+			DestroyWindow(hwndDlg);
+			hWndDevices = NULL;
+			return true;
+		}
+	}
+	}
+	return false;
+}
 
 void WndProc(void* userdata, void* hWnd, unsigned int message, Uint64 wParam, Sint64 lParam)
 {
@@ -161,6 +256,15 @@ void WndProc(void* userdata, void* hWnd, unsigned int message, Uint64 wParam, Si
 				{
 					hWndOptions = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_OPTIONS), (HWND)hWnd, (DLGPROC)OptionsWndProc);
 					ShowWindow(hWndOptions, SW_SHOW);
+				}
+			}
+			else if (uiCommand == cmdDevices)
+			{
+				uiCommand = cmdNone;
+				if (!IsWindow(hWndDevices))
+				{
+					hWndDevices = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DEVICES), (HWND)hWnd, (DLGPROC)DevicesWndProc);
+					ShowWindow(hWndDevices, SW_SHOW);
 				}
 			}
 		}
