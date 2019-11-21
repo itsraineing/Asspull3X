@@ -140,7 +140,8 @@ int main(int argc, char*argv[])
 		if (thing[0] == 0) continue;
 		if (!strcmp(thing, "diskDrive"))
 		{
-			SDL_Log("Can only have one disk drive, at device #0.");
+			SDL_Log("Attached a disk drive as device #%d.", i);
+			devices[i] = (Device*)(new DiskDrive());
 		}
 		else if (!strcmp(thing, "linePrinter"))
 		{

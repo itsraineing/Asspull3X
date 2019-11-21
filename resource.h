@@ -9,8 +9,13 @@
 #define IDB_BITMAP1                     103
 #define IDD_DEVICES                     105
 #define IDI_ICON1                       107
+#define IDI_A3X                         107
 #define IDD_MEMVIEWER                   108
 #define IDD_OPTIONS                     109
+#define IDI_PRINTER                     111
+#define IDI_DISKDRIVE                   112
+#define IDI_ICON2                       113
+#define IDI_BLANK                       113
 #define IDC_COMBO1                      1000
 #define IDC_COMBO2                      1001
 #define IDC_EDIT1                       1002
@@ -29,15 +34,17 @@
 #define IDC_HEADER                      1010
 #define IDC_DEVTYPE                     1011
 #define IDC_DEVNONE                     1012
+#define IDC_DECO                        1013
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        111
+#define _APS_NO_MFC                     1
+#define _APS_NEXT_RESOURCE_VALUE        114
 #define _APS_NEXT_COMMAND_VALUE         40012
-#define _APS_NEXT_CONTROL_VALUE         1013
+#define _APS_NEXT_CONTROL_VALUE         1014
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -18,6 +18,8 @@ int uiData, uiCommand;
 
 HWND hWndAbout = NULL, hWndMemViewer = NULL, hWndOptions = NULL, hWndDevices = NULL;
 
+bool ShowFileDlg(bool toSave, char* target, size_t max, const char* filter);
+
 BOOL CALLBACK AboutWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -129,11 +131,11 @@ BOOL CALLBACK OptionsWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 
 void UpdateDevicePage(HWND hwndDlg)
 {
-	int selection = SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCURSEL, 0, 0);
-	auto device = devices[selection];
+	int devNum = SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCURSEL, 0, 0);
+	auto device = devices[devNum];
 
 	//Don't allow changing device #0 from disk drive
-	EnableWindow(GetDlgItem(hwndDlg, IDC_DEVTYPE), (selection > 0));
+	EnableWindow(GetDlgItem(hwndDlg, IDC_DEVTYPE), (devNum > 0));
 
 	//Hide everything regardless at first.
 	int everything[] = { IDC_DEVNONE, IDC_DDFILE, IDC_DDINSERT, IDC_DDEJECT };
@@ -145,22 +147,35 @@ void UpdateDevicePage(HWND hwndDlg)
 		ShowWindow(GetDlgItem(hwndDlg, IDC_DEVNONE), SW_SHOW);
 		SetDlgItemText(hwndDlg, IDC_HEADER, "No device");
 		SendDlgItemMessage(hwndDlg, IDC_DEVTYPE, LB_SETCURSEL, 0, 0);
+		SendDlgItemMessage(hwndDlg, IDC_DECO, STM_SETICON, (WPARAM)LoadImage(hInstance, MAKEINTRESOURCE(IDI_BLANK), IMAGE_ICON, 0, 0, 0), 0);
 	}
 	else
 	{
 		switch (device->GetID())
 		{
 		case 0x0144:
+		{
 			for (int i = 1; i < 4; i++)
 				ShowWindow(GetDlgItem(hwndDlg, everything[i]), SW_SHOW);
 			SetDlgItemText(hwndDlg, IDC_HEADER, "Disk drive");
 			SendDlgItemMessage(hwndDlg, IDC_DEVTYPE, LB_SETCURSEL, 1, 0);
+			char key[8] = { 0 };
+			SDL_itoa(devNum, key, 10);
+			auto val = ini->Get("devices/diskDrive", key, "");
+			SetDlgItemText(hwndDlg, IDC_DDFILE, val);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_DDINSERT), val[0] == 0);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_DDEJECT), val[0] != 0);
+			SendDlgItemMessage(hwndDlg, IDC_DECO, STM_SETICON, (WPARAM)LoadImage(hInstance, MAKEINTRESOURCE(IDI_DISKDRIVE), IMAGE_ICON, 0, 0, 0), 0);
 			break;
+		}
 		case 0x4C50:
+		{
 			ShowWindow(GetDlgItem(hwndDlg, IDC_DEVNONE), SW_SHOW);
 			SetDlgItemText(hwndDlg, IDC_HEADER, "Line printer");
 			SendDlgItemMessage(hwndDlg, IDC_DEVTYPE, LB_SETCURSEL, 2, 0);
+			SendDlgItemMessage(hwndDlg, IDC_DECO, STM_SETICON, (WPARAM)LoadImage(hInstance, MAKEINTRESOURCE(IDI_PRINTER), IMAGE_ICON, 0, 0, 0), 0);
 			break;
+		}
 		}
 	}
 }
@@ -270,6 +285,46 @@ BOOL CALLBACK DevicesWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 		{
 			SwitchDevice(hwndDlg);
 			return true;
+		}
+		else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDC_DDINSERT)
+		{
+			int devID = SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCURSEL, 0, 0);
+			char thePath[256] = { 0 };
+			if (ShowFileDlg(false, thePath, 256, "Disk images (*.img)|*.img"))
+			{
+				auto ext = strrchr(thePath, '.') + 1;
+				if (SDL_strncasecmp(ext, "img", 3) == 0)
+				{
+					auto ret = ((DiskDrive*)devices[devID])->Mount(thePath);
+					if (ret == -1)
+						MessageBox(hwndDlg, "Eject the diskette first.", "Asspull IIIx", MB_ICONEXCLAMATION);
+					else if (ret != 0)
+						MessageBox(hwndDlg, "Error trying to open disk image.", "Asspull IIIx", MB_ICONERROR);
+					else
+					{
+						SetDlgItemText(hwndDlg, IDC_DDFILE, thePath);
+						char key[8] = { 0 };
+						SDL_itoa(devID, key, 10);
+						ini->Set("devices/diskDrive", key, thePath);
+						EnableWindow(GetDlgItem(hwndDlg, IDC_DDINSERT), 0);
+						EnableWindow(GetDlgItem(hwndDlg, IDC_DDEJECT), 1);
+					}
+				}
+				else
+					SDL_Log("Don't know what to do with %s.", thePath);
+			}
+			return true;
+		}
+		else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDC_DDEJECT)
+		{
+			int devID = SendDlgItemMessage(hwndDlg, IDC_DEVLIST, LB_GETCURSEL, 0, 0);
+			auto ret = ((DiskDrive*)devices[devID])->Unmount();
+			SetDlgItemText(hwndDlg, IDC_DDFILE, "");
+			char key[8] = { 0 };
+			SDL_itoa(devID, key, 10);
+			ini->Set("devices/diskDrive", key, "");
+			EnableWindow(GetDlgItem(hwndDlg, IDC_DDINSERT), 1);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_DDEJECT), 0);
 		}
 		else if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == IDOK)
 		{
