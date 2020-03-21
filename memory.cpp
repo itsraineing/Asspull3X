@@ -42,6 +42,8 @@ extern int gfxMode, gfxFade, scrollX[4], scrollY[4], tileShift[4], mapEnabled[4]
 
 extern int line, interrupts;
 
+extern int GetMouseState(int *x, int *y);
+
 void HandleHdma(int line)
 {
 	for (auto i = 0; i < 8; i++)
@@ -184,6 +186,12 @@ unsigned int m68k_read_memory_32(unsigned int address)
 		{
 			case 0x04: //Ticks
 				return (int)ticks;
+			case 0x48: //Mouse
+				{
+					int dX, dY;
+					GetMouseState(&dX, &dY);
+					return (dY << 16) | dX;
+				}
 			case 0x60: //Time_T (top half)
 				timelatch = (rtcOffset == 0xDEADC70C) ? 0 : (time(NULL) + rtcOffset);
 				return (int)(timelatch >> 32);
